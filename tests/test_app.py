@@ -73,3 +73,8 @@ def test_setup_page_and_device_token_save(client):
 def test_map_tile_rejects_invalid_coordinates(client):
     response = client.get("/map-tiles/20/0/0.png")
     assert response.status_code == 400
+
+
+def test_geocode_rejects_empty_query(client):
+    response = client.get("/api/geocode?q=")
+    assert response.status_code == 400

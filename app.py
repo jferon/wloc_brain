@@ -3,6 +3,7 @@ import secrets
 import sqlite3
 import urllib.error
 import urllib.request
+import urllib.parse
 from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
@@ -100,6 +101,25 @@ def load_user():
 def init_db_command():
     init_db()
     print("Initialized database.")
+
+
+@app.get("/api/geocode")
+def geocode():
+    query = request.args.get("q", "").strip()
+    if not query or len(query) > 120:
+        return {"ok": False, "error": "搜索内容无效"}, 400
+    target = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=zh-CN&q=" + urllib.parse.quote(query)
+    req = urllib.request.Request(target, headers={"User-Agent": "WLOC-Brain/0.1 geocoder"})
+    try:
+        with urllib.request.urlopen(req, timeout=8) as response:
+            body = response.read(512 * 1024 + 1)
+            if len(body) > 512 * 1024:
+                return {"ok": False, "error": "搜索结果过大"}, 502
+            output = app.response_class(body, status=200, mimetype="application/json")
+            output.headers["Cache-Control"] = "public, max-age=300"
+            return output
+    except (urllib.error.URLError, TimeoutError):
+        return {"ok": False, "error": "地名搜索服务暂时不可用"}, 502
 
 
 @app.get("/map-tiles/<int:z>/<int:x>/<int:y>.png")
