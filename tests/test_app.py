@@ -105,3 +105,8 @@ def test_branding_is_shan_xian_la(client):
     text = page.get_data(as_text=True)
     assert "闪现啦" in text
     assert "/static/logo.svg" in text
+
+
+def test_module_route_rejects_invalid_token(client):
+    response = client.get("/device/1/module?token=wrong")
+    assert response.status_code == 404

@@ -251,6 +251,33 @@ def create_device():
     return redirect(url_for("dashboard"))
 
 
+MODULE_SOURCES = {
+    "shadowrocket": "https://raw.githubusercontent.com/xepes0/wloc/refs/heads/main/modules/wloc.module",
+    "surge": "https://raw.githubusercontent.com/xepes0/wloc/refs/heads/main/modules/wloc.sgmodule",
+}
+
+
+@app.get("/device/<int:device_id>/module")
+def device_module(device_id):
+    token = request.args.get("token", "")
+    device = get_db().execute("SELECT * FROM devices WHERE id = ?", (device_id,)).fetchone()
+    source = MODULE_SOURCES.get(device["client_type"] if device else "")
+    if not device or not source or not token or not check_password_hash(device["token_hash"], token):
+        return {"ok": False, "error": "模块链接无效"}, 404
+    try:
+        upstream = urllib.request.Request(source, headers={"User-Agent": "WLOC-Brain/0.1 module proxy"})
+        with urllib.request.urlopen(upstream, timeout=8) as response:
+            body = response.read(512 * 1024 + 1)
+        if len(body) > 512 * 1024:
+            return {"ok": False, "error": "模块文件过大"}, 502
+    except (urllib.error.URLError, TimeoutError):
+        return {"ok": False, "error": "模块服务暂时不可用"}, 502
+    output = app.response_class(body, status=200, mimetype="text/plain")
+    output.headers["Content-Disposition"] = "inline; filename=shanxianla-wloc.module"
+    output.headers["Cache-Control"] = "no-store"
+    return output
+
+
 @app.route("/setup/<int:device_id>")
 def setup(device_id):
     token = request.args.get("token", "")

@@ -7,3 +7,5 @@
 .layer-buttons{display:flex;background:rgba(255,255,255,.96);border-radius:8px;box-shadow:0 1px 5px #0003;overflow:hidden}.layer-button{border:0;background:#fff;color:#27364d;padding:8px 10px;font-size:12px;cursor:pointer}.layer-button+ .layer-button{border-left:1px solid #dbe2ee}.layer-button.active{background:#2563eb;color:#fff}
 
 .action-row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.button.secondary{background:#e5e7eb;color:#263247}.button.danger{background:#ff3b30}.feature-card{background:#fff;border-radius:12px;padding:16px;margin:12px 0}.feature-card h2{font-size:18px;margin:0 0 10px}.muted{color:#8e8e93}.active-location{background:#f2f2f7;border-radius:8px;padding:12px;font-family:monospace}.favorites{display:grid;gap:7px}.favorite-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f2f2f7;border-radius:8px}.favorite-item>div{cursor:pointer;flex:1}.favorite-item b,.favorite-item small{display:block}.favorite-item small{color:#6b7280;font-family:monospace;margin-top:3px}.delete-favorite{border:0;background:transparent;color:#ff3b30;font-size:20px}
+
+.button.small{padding:7px 10px;font-size:13px}
