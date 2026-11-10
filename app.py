@@ -257,6 +257,18 @@ MODULE_SOURCES = {
 }
 
 
+RESTORE_SHORTCUT_URL = "https://www.icloud.com/shortcuts/f42632d406504f24a2cd163af4fe012f"
+
+
+@app.get("/device/<int:device_id>/restore")
+def restore_shortcut(device_id):
+    token = request.args.get("token", "")
+    device = get_db().execute("SELECT * FROM devices WHERE id = ?", (device_id,)).fetchone()
+    if not device or not token or not check_password_hash(device["token_hash"], token):
+        return {"ok": False, "error": "恢复链接无效"}, 404
+    return redirect(RESTORE_SHORTCUT_URL)
+
+
 @app.get("/device/<int:device_id>/module")
 def device_module(device_id):
     token = request.args.get("token", "")

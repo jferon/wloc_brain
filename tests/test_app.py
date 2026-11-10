@@ -110,3 +110,8 @@ def test_branding_is_shan_xian_la(client):
 def test_module_route_rejects_invalid_token(client):
     response = client.get("/device/1/module?token=wrong")
     assert response.status_code == 404
+
+
+def test_restore_shortcut_rejects_invalid_token(client):
+    response = client.get("/device/1/restore?token=wrong")
+    assert response.status_code == 404
