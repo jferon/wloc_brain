@@ -24,3 +24,8 @@ Open http://127.0.0.1:5000, register, create a demo order, create a device, and 
 - The one-time setup URL is shown only in the redirect session flow and should be replaced with a proper encrypted/one-time delivery mechanism before production.
 - CSRF protection, rate limiting, email verification, password reset, migrations, admin controls, production HTTPS, and payment webhooks are not implemented yet.
 - The device-side save request only works when the page is opened on the phone and traffic is intercepted by the configured WLOC module.
+
+
+## Android MVP
+
+选择 `Android 模拟位置` 后，安装页会保存坐标并尝试复制 `纬度,经度`。Android 系统位置仍需用户在开发者选项中选择模拟位置信息应用并手动应用坐标；当前版本没有 Android Companion App，也不会自动修改系统 GPS。

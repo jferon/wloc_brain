@@ -78,3 +78,19 @@ def test_map_tile_rejects_invalid_coordinates(client):
 def test_geocode_rejects_empty_query(client):
     response = client.get("/api/geocode?q=")
     assert response.status_code == 400
+
+
+def test_android_setup_has_mock_location_instructions(client):
+    register(client)
+    client.post("/login", data={"email": "a@example.com", "password": "password123"})
+    client.post("/orders")
+    response = client.post("/devices", data={"order_id": 1, "name": "Android", "client_type": "android_mock"}, follow_redirects=True)
+    import re
+    setup_url = re.search(r'value="([^" ]+/setup/[^" ]+)"', response.get_data(as_text=True)).group(1)
+    from urllib.parse import urlparse, parse_qs
+    parsed = urlparse(setup_url)
+    page = client.get(parsed.path + "?token=" + parse_qs(parsed.query)["token"][0])
+    text = page.get_data(as_text=True)
+    assert page.status_code == 200
+    assert "Android 模拟位置" in text
+    assert "保存并复制坐标" in text
