@@ -269,6 +269,16 @@ def restore_shortcut(device_id):
     return redirect(RESTORE_SHORTCUT_URL)
 
 
+@app.get("/device/<int:device_id>/module-guide")
+def module_guide(device_id):
+    token = request.args.get("token", "")
+    device = get_db().execute("SELECT * FROM devices WHERE id = ?", (device_id,)).fetchone()
+    if not device or not token or not check_password_hash(device["token_hash"], token):
+        return render_template("error.html", message="模块安装链接无效或已过期。"), 404
+    module_url = url_for("device_module", device_id=device_id, token=token, _external=True)
+    return render_template("module_guide.html", device=device, module_url=module_url)
+
+
 @app.get("/device/<int:device_id>/module")
 def device_module(device_id):
     token = request.args.get("token", "")

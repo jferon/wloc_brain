@@ -115,3 +115,20 @@ def test_module_route_rejects_invalid_token(client):
 def test_restore_shortcut_rejects_invalid_token(client):
     response = client.get("/device/1/restore?token=wrong")
     assert response.status_code == 404
+
+
+def test_module_guide_hides_upstream_url(client):
+    register(client)
+    client.post("/login", data={"email": "a@example.com", "password": "password123"})
+    client.post("/orders")
+    response = client.post("/devices", data={"order_id": 1, "name": "Guide", "client_type": "shadowrocket"}, follow_redirects=True)
+    import re
+    setup_url = re.search(r'value="([^" ]+/setup/[^" ]+)"', response.get_data(as_text=True)).group(1)
+    from urllib.parse import urlparse, parse_qs
+    parsed = urlparse(setup_url)
+    token = parse_qs(parsed.query)["token"][0]
+    guide = client.get(f"/device/1/module-guide?token={token}")
+    text = guide.get_data(as_text=True)
+    assert guide.status_code == 200
+    assert "安装闪现啦模块" in text
+    assert "raw.githubusercontent.com" not in text
