@@ -11,3 +11,5 @@
 .button.small{padding:7px 10px;font-size:13px}
 
 .guide{max-width:720px;margin:20px auto}.guide-intro{color:#64748b}.guide-step{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid #e5e7eb}.guide-step>span{width:30px;height:30px;flex:none;border-radius:50%;background:#2563eb;color:#fff;display:grid;place-items:center;font-weight:700}.guide-step h2{font-size:18px;margin:0 0 6px}.guide-step p{margin:0 0 10px;color:#526079}.visually-hidden{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}
+
+.warning{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;border-radius:8px;padding:10px 12px;font-size:13px}

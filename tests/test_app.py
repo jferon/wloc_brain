@@ -131,4 +131,6 @@ def test_module_guide_hides_upstream_url(client):
     text = guide.get_data(as_text=True)
     assert guide.status_code == 200
     assert "安装闪现啦模块" in text
+    assert "证书信任设置" in text
+    assert "完全信任" in text
     assert "raw.githubusercontent.com" not in text
