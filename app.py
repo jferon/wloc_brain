@@ -187,10 +187,10 @@ def create_device():
     db.execute("INSERT INTO devices(user_id, order_id, name, client_type, token_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                (g.user["id"], order_id, name, client_type, generate_password_hash(raw_token), now()))
     db.commit()
-    # The raw token is only shown once through the setup URL in this response flow.
+    # The raw token is returned only in the creation response flow.
     device_id = db.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
     session["new_setup_url"] = url_for("setup", device_id=device_id, token=raw_token, _external=True)
-    flash("设备配置已生成。请复制一次性安装链接。", "success")
+    flash("设备配置已生成。请复制安装链接。", "success")
     return redirect(url_for("dashboard"))
 
 
@@ -200,35 +200,63 @@ def setup(device_id):
     device = get_db().execute("SELECT * FROM devices WHERE id = ?", (device_id,)).fetchone()
     if not device or not token or not check_password_hash(device["token_hash"], token):
         return render_template("error.html", message="安装链接无效或已过期。"), 404
-    return render_template("setup.html", device=device, save_host="https://gs-loc.apple.com/wloc-settings/save")
+    return render_template("setup.html", device=device, token=token, save_host="https://gs-loc.apple.com/wloc-settings/save")
 
 
-@app.post("/api/locations")
-@login_required
-def save_location():
-    payload = request.get_json(silent=True) or request.form
+def parse_location_payload(payload):
     def number(name, cast):
         value = payload.get(name)
         try:
             return cast(value) if value not in (None, "") else None
         except (TypeError, ValueError):
             return None
-    device_id = number("device_id", int)
     lat = number("latitude", float)
     lon = number("longitude", float)
-    name = (payload.get("name") or "").strip()
     accuracy = number("accuracy", float) or 25
-    if device_id is None or lat is None or lon is None or not (-90 <= lat <= 90 and -180 <= lon <= 180):
-        return {"ok": False, "error": "坐标或设备参数无效"}, 400
+    name = (payload.get("name") or "").strip()[:80]
+    if lat is None or lon is None or not (-90 <= lat <= 90 and -180 <= lon <= 180):
+        return None
+    return lat, lon, accuracy, name
+
+
+def record_location(device, location):
+    lat, lon, accuracy, name = location
     db = get_db()
-    device = db.execute("SELECT * FROM devices WHERE id = ? AND user_id = ?", (device_id, g.user["id"])).fetchone()
-    if not device:
-        return {"ok": False, "error": "设备不属于当前用户"}, 403
     db.execute("INSERT INTO locations(user_id, device_id, name, latitude, longitude, accuracy, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-               (g.user["id"], device_id, name, lat, lon, accuracy, now()))
-    db.execute("UPDATE devices SET last_seen_at = ? WHERE id = ?", (now(), device_id))
+               (device["user_id"], device["id"], name, lat, lon, accuracy, now()))
+    db.execute("UPDATE devices SET last_seen_at = ? WHERE id = ?", (now(), device["id"]))
     db.commit()
     return {"ok": True, "message": "服务器已保存坐标；请继续点击储存到设备完成手机端写入。"}
+
+
+@app.post("/api/locations")
+@login_required
+def save_location():
+    payload = request.get_json(silent=True) or request.form
+    try:
+        device_id = int(payload.get("device_id"))
+    except (TypeError, ValueError):
+        device_id = None
+    location = parse_location_payload(payload)
+    if device_id is None or location is None:
+        return {"ok": False, "error": "坐标或设备参数无效"}, 400
+    device = get_db().execute("SELECT * FROM devices WHERE id = ? AND user_id = ?", (device_id, g.user["id"])).fetchone()
+    if not device:
+        return {"ok": False, "error": "设备不属于当前用户"}, 403
+    return record_location(device, location)
+
+
+@app.post("/api/device/<int:device_id>/locations")
+def save_device_location(device_id):
+    payload = request.get_json(silent=True) or request.form
+    token = request.headers.get("X-WLOC-Device-Token") or payload.get("token") or ""
+    device = get_db().execute("SELECT * FROM devices WHERE id = ?", (device_id,)).fetchone()
+    if not device or not token or not check_password_hash(device["token_hash"], token):
+        return {"ok": False, "error": "设备 Token 无效"}, 401
+    location = parse_location_payload(payload)
+    if location is None:
+        return {"ok": False, "error": "坐标或设备参数无效"}, 400
+    return record_location(device, location)
 
 
 with app.app_context():
