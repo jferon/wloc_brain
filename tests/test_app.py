@@ -98,3 +98,10 @@ def test_android_setup_has_mock_location_instructions(client):
     assert page.status_code == 200
     assert "Android 模拟位置" in text
     assert "保存并复制坐标" in text
+
+
+def test_branding_is_shan_xian_la(client):
+    page = client.get("/")
+    text = page.get_data(as_text=True)
+    assert "闪现啦" in text
+    assert "/static/logo.svg" in text

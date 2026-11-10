@@ -1,0 +1,7 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">闪现啦</title><desc id="desc">闪电与定位针组合标志</desc>
+  <defs><linearGradient id="g" x1="7" y1="4" x2="34" y2="37" gradientUnits="userSpaceOnUse"><stop stop-color="#60A5FA"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+  <path d="M20 3.5C12.27 3.5 6 9.77 6 17.5c0 10.32 14 19 14 19s14-8.68 14-19C34 9.77 27.73 3.5 20 3.5Z" fill="url(#g)"/>
+  <circle cx="20" cy="17" r="5.4" fill="#fff" fill-opacity=".96"/>
+  <path d="m21.5 9.5-6 8h4l-1 7 6-8h-4l1-7Z" fill="#4F46E5"/>
+</svg>
