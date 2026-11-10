@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="hero"><h1>WLOC Brain</h1><p>为已配置代理模块的 iPhone 提供 Web 选点和设备端保存。</p><a class="button" href="{{ url_for('register') }}">开始使用</a> <a href="{{ url_for('login') }}">登录</a></section><section class="card"><h2>工作边界</h2><p>网页负责选点和管理配置；Shadowrocket/WLOC 模块负责在手机端拦截并保存坐标。证书信任和代理开关仍需在 iPhone 上确认。</p></section>{% endblock %}
