@@ -57,6 +57,7 @@ def test_setup_page_and_device_token_save(client):
     page_text = page.get_data(as_text=True)
     assert "储存到设备" in page_text
     assert "搜索地名" in page_text
+    assert "卫星影像" in page_text
     saved = client.post(f"/api/device/{device_id}/locations", json={
         "latitude": 31.2304,
         "longitude": 121.4737,
