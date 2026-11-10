@@ -103,6 +103,22 @@ def init_db_command():
     print("Initialized database.")
 
 
+@app.get("/api/parse")
+def parse_map_input():
+    import re
+    raw = request.args.get("u", "").strip()
+    if not raw or len(raw) > 2000:
+        return {"error": "输入无效"}, 422
+    patterns = [r"(?:coordinate|ll|q|center|location|@)=?(-?\d{1,3}\.\d+)\s*[,，]\s*(-?\d{1,3}\.\d+)", r"(-?\d{1,2}\.\d{3,})\s*[,，]\s*(-?\d{1,3}\.\d{3,})"]
+    for pattern in patterns:
+        match = re.search(pattern, raw, re.I)
+        if match:
+            lat, lon = float(match.group(1)), float(match.group(2))
+            if -90 <= lat <= 90 and -180 <= lon <= 180:
+                return {"lat": round(lat, 6), "lon": round(lon, 6), "name": ""}
+    return {"error": "未找到合法坐标"}, 422
+
+
 @app.get("/api/geocode")
 def geocode():
     query = request.args.get("q", "").strip()
