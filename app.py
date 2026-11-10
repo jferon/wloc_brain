@@ -1,6 +1,8 @@
 import os
 import secrets
 import sqlite3
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
@@ -98,6 +100,25 @@ def load_user():
 def init_db_command():
     init_db()
     print("Initialized database.")
+
+
+@app.get("/map-tiles/<int:z>/<int:x>/<int:y>.png")
+def map_tile(z, x, y):
+    """Proxy OSM tiles through the same Flask origin for restricted mobile networks."""
+    if z < 0 or z > 19 or x < 0 or y < 0 or x >= 2 ** z or y >= 2 ** z:
+        return {"ok": False, "error": "invalid tile"}, 400
+    target = f"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+    request = urllib.request.Request(target, headers={"User-Agent": "WLOC-Brain/0.1 map tile proxy"})
+    try:
+        with urllib.request.urlopen(request, timeout=8) as response:
+            body = response.read(512 * 1024 + 1)
+            if len(body) > 512 * 1024:
+                return {"ok": False, "error": "tile too large"}, 502
+            output = app.response_class(body, status=200, mimetype="image/png")
+            output.headers["Cache-Control"] = "public, max-age=86400"
+            return output
+    except (urllib.error.URLError, TimeoutError):
+        return {"ok": False, "error": "map tile upstream unavailable"}, 502
 
 
 @app.route("/")

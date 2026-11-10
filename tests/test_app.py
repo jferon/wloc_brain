@@ -68,3 +68,8 @@ def test_setup_page_and_device_token_save(client):
         "latitude": 31.2304, "longitude": 121.4737,
     }, headers={"X-WLOC-Device-Token": "wrong"})
     assert denied.status_code == 401
+
+
+def test_map_tile_rejects_invalid_coordinates(client):
+    response = client.get("/map-tiles/20/0/0.png")
+    assert response.status_code == 400
