@@ -143,9 +143,10 @@ def test_setup_has_device_save_fallback(client):
     from pathlib import Path
     source = Path("templates/setup.html").read_text()
     assert "mode:'no-cors'" in source
-    assert "无法读取模块响应" in source
+    assert "无法读取跨域响应" in source
     assert "_wloc_ts=" in source
     assert "已尝试发送设备写入请求" in source
     assert "debugLog('WLOC cors 请求失败'" in source
     assert "debugLog('WLOC no-cors 请求失败'" in source
     assert "copy-debug" in source
+    assert "在 Safari 中验证设备坐标" in source
