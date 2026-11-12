@@ -153,5 +153,7 @@ def test_setup_has_device_save_fallback(client):
     assert "shortcut-berlin" in source
     assert "shortcuts://run-shortcut" in source
     assert "52.520008,13.404954" in source
+    assert "shortcut-berlin-coordinates" in source
+    assert "berlinCoordinatesShortcutUrl" in source
     assert "payload.success!==true" in source
     assert "模块已确认保存坐标；这不代表系统定位已切换" in source
