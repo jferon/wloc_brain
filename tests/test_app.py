@@ -54,6 +54,7 @@ def test_setup_page_and_device_token_save(client):
     token = parse_qs(parsed.query)["token"][0]
     page = client.get(parsed.path + "?token=" + token)
     assert page.status_code == 200
+    assert page.headers["Cache-Control"] == "no-store, max-age=0"
     page_text = page.get_data(as_text=True)
     assert "储存到设备" in page_text
     assert "搜索地名" in page_text
@@ -143,3 +144,8 @@ def test_setup_has_device_save_fallback(client):
     source = Path("templates/setup.html").read_text()
     assert "mode:'no-cors'" in source
     assert "无法读取模块响应" in source
+    assert "_wloc_ts=" in source
+    assert "已尝试发送设备写入请求" in source
+    assert "debugLog('WLOC cors 请求失败'" in source
+    assert "debugLog('WLOC no-cors 请求失败'" in source
+    assert "copy-debug" in source

@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, flash, g, make_response, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -306,7 +306,10 @@ def setup(device_id):
     device = get_db().execute("SELECT * FROM devices WHERE id = ?", (device_id,)).fetchone()
     if not device or not token or not check_password_hash(device["token_hash"], token):
         return render_template("error.html", message="安装链接无效或已过期。"), 404
-    return render_template("setup.html", device=device, token=token, save_host="https://gs-loc.apple.com/wloc-settings/save")
+    response = make_response(render_template("setup.html", device=device, token=token, save_host="https://gs-loc.apple.com/wloc-settings/save"))
+    # The setup page contains inline diagnostics and must not remain on an old Safari cache.
+    response.headers["Cache-Control"] = "no-store, max-age=0"
+    return response
 
 
 def parse_location_payload(payload):
