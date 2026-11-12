@@ -134,3 +134,12 @@ def test_module_guide_hides_upstream_url(client):
     assert "证书信任设置" in text
     assert "完全信任" in text
     assert "raw.githubusercontent.com" not in text
+
+
+def test_setup_has_device_save_fallback(client):
+    page = client.get("/")
+    # The setup template is rendered only after a device token, so inspect its source here.
+    from pathlib import Path
+    source = Path("templates/setup.html").read_text()
+    assert "mode:'no-cors'" in source
+    assert "无法读取模块响应" in source
